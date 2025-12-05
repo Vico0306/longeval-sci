@@ -2,3 +2,7 @@
 {"qid": "Q1", "doc_id": "D3", "rel": 1}
 {"qid": "Q2", "doc_id": "D4", "rel": 2}
 {"qid": "Q3", "doc_id": "D2", "rel": 2}
+{"qid": "Q4", "doc_id": "D2", "rel": 2}
+{"qid": "Q5", "doc_id": "D3", "rel": 2}
+{"qid": "Q6", "doc_id": "D5", "rel": 2}
+{"qid": "Q7", "doc_id": "D4", "rel": 2}

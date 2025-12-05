@@ -17,3 +17,12 @@ Auf unserem Toy-Testset zeigte sich α = 0.5 mit einem nDCG@3 von 0.8863 als bes
 | Hybrid    | 0.5 | 0.8863 |
 | Hybrid    | 0.6 | 0.8213 |
 | Hybrid    | 0.7 | 0.8213 |
+
+Neue Evaluation (7 Queries):
+| System | α   | nDCG@3 |
+| ------ | --- | ------ |
+| BM25   | –   | 0.7091 |
+| Hybrid | 0.5 | 0.7557 |
+
+Mit einer erweiterten Menge von 7 Queries zeigt sich, dass das Hybrid-System mit α = 0.5 im Schnitt ein höheres nDCG@3 (0.756) erreicht als die BM25-Baseline (0.709).
+Besonders bei semantisch komplexeren Anfragen (z. B. Q3, Q4) profitiert das Hybrid-System von der Kombination aus sparscher und dichter Repräsentation.
