@@ -6,6 +6,7 @@ from rank_bm25 import BM25Okapi
 from sentence_transformers import SentenceTransformer
 import numpy as np
 import faiss
+import sys
 
 DOCS_PATH = Path("data/docs_sample.jsonl")
 QUERIES_PATH = Path("data/queries_sample.jsonl")
@@ -70,7 +71,7 @@ def main():
         print("Keine Queries geladen – prüfe data/queries_sample.jsonl")
         return
 
-    alpha = 0.6  # Gewichtung BM25 vs Dense
+    alpha = float(sys.argv[1]) if len(sys.argv) > 1 else 0.5  # Gewichtung BM25 vs Dense
     k = 3        # Top-k Dokumente anzeigen
 
     run_entries = []  # hier sammeln wir alles für die Run-Datei

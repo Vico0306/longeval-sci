@@ -7,3 +7,13 @@ Für ein kleines, manuell annotiertes Testset (3 Queries, 5 Dokumente, einfache 
 Ergebnis (Toy-Setup):
 BM25 und Hybrid erreichen beide einen durchschnittlichen nDCG@3 von ca. 0.82.
 → Im kleinen Setup ist das Hybrid-System noch nicht klar besser, aber die vollständige Pipeline für einen systematischen Vergleich ist implementiert (Run-File + nDCG-Eval).
+
+In einer ersten Parameterstudie haben wir das Gewicht α zwischen BM25 und Dense-Scores variiert (0.3, 0.5, 0.7).
+Auf unserem Toy-Testset zeigte sich α = 0.5 mit einem nDCG@3 von 0.8863 als beste Konfiguration, während BM25-only und Hybrid mit α ≥ 0.6 bei etwa 0.82 lagen.
+| System    | α   | nDCG@3 |
+| --------- | --- | ------ |
+| BM25-only | –   | 0.8213 |
+| Hybrid    | 0.3 | 0.8623 |
+| Hybrid    | 0.5 | 0.8863 |
+| Hybrid    | 0.6 | 0.8213 |
+| Hybrid    | 0.7 | 0.8213 |
