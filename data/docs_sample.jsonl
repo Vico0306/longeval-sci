@@ -1,1 +1,6 @@
+{"id": "D1", "text": "Neural information retrieval combines deep learning with traditional IR methods."}
+{"id": "D2", "text": "BM25 is a strong sparse retrieval baseline for many search tasks."}
+{"id": "D3", "text": "Dense retrieval uses vector representations of queries and documents."}
+{"id": "D4", "text": "LongEval-Sci focuses on temporal robustness of scientific retrieval systems."}
+{"id": "D5", "text": "Hybrid systems combine BM25 and dense models to improve robustness."}
 
