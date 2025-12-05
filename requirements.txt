@@ -2,4 +2,6 @@ rank-bm25
 pandas
 numpy
 tqdm
+sentence-transformers
+faiss-cpu
 
