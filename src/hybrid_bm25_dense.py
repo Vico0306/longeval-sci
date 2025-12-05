@@ -1,3 +1,5 @@
+print("HYBRID SCRIPT WIRD AUSGEFÜHRT")
+
 import json
 from pathlib import Path
 from rank_bm25 import BM25Okapi
@@ -5,9 +7,11 @@ from sentence_transformers import SentenceTransformer
 import numpy as np
 import faiss
 
-
 DOCS_PATH = Path("data/docs_sample.jsonl")
 QUERIES_PATH = Path("data/queries_sample.jsonl")
+RUNS_DIR = Path("runs")
+RUNS_DIR.mkdir(exist_ok=True)
+RUN_PATH = RUNS_DIR / "hybrid_sample.jsonl"
 
 
 def load_jsonl(path: Path):
@@ -69,6 +73,8 @@ def main():
     alpha = 0.6  # Gewichtung BM25 vs Dense
     k = 3        # Top-k Dokumente anzeigen
 
+    run_entries = []  # hier sammeln wir alles für die Run-Datei
+
     for q in queries:
         qid = q["id"]
         qtext = q["text"]
@@ -92,14 +98,31 @@ def main():
         hybrid_scores = alpha * bm25_norm + (1 - alpha) * dense_norm
 
         ranked_indices = np.argsort(-hybrid_scores)
+
         for rank, idx in enumerate(ranked_indices[:k], start=1):
             did = doc_ids[idx]
             dtext = doc_texts[idx]
+            h_score = float(hybrid_scores[idx])
             print(
-                f"Rank {rank}: {did} | hybrid={hybrid_scores[idx]:.4f}, "
+                f"Rank {rank}: {did} | hybrid={h_score:.4f}, "
                 f"bm25={bm25_norm[idx]:.4f}, dense={dense_norm[idx]:.4f}"
             )
             print(f"  {dtext}")
+
+            # Eintrag für Run-File merken
+            run_entries.append({
+                "qid": qid,
+                "doc_id": did,
+                "rank": rank,
+                "score": h_score
+            })
+
+    # Run-Datei schreiben
+    with RUN_PATH.open("w", encoding="utf-8") as f:
+        for entry in run_entries:
+            f.write(json.dumps(entry) + "\n")
+
+    print(f"\nRun-Datei geschrieben nach: {RUN_PATH}")
 
 
 if __name__ == "__main__":
