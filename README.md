@@ -27,6 +27,52 @@ Neue Evaluation (7 Queries):
 Mit einer erweiterten Menge von 7 Queries zeigt sich, dass das Hybrid-System mit α = 0.5 im Schnitt ein höheres nDCG@3 (0.756) erreicht als die BM25-Baseline (0.709).
 Besonders bei semantisch komplexeren Anfragen (z. B. Q3, Q4) profitiert das Hybrid-System von der Kombination aus sparscher und dichter Repräsentation.
 
+## Implemented Features Snapshot 2026 1 / 04/2026
+
+# Implemented Features
+
+| Feature | Variable | Description | Purpose |
+|---|---|---|---|
+| BM25 Score | `f_bm25` | Original BM25 relevance score | Baseline retrieval signal |
+| Query Length | `f_qlen` | Number of terms in the query | Handles short vs. long queries |
+| Document Length | `f_doclen` | Number of words in the document | Learns document length preferences |
+| Publication Year | `f_year` | Publication year extracted from metadata | Captures temporal relevance |
+
+---
+
+# Core Ranking Features
+
+```python
+feature_cols = [
+    "f_bm25",
+    "f_qlen",
+    "f_doclen",
+    "f_year"
+]
+```
+
+---
+
+# Evaluation Results (NDCG@10)
+
+| Model | Alpha | NDCG@10 |
+|---|---|---|
+| BM25 Baseline | - | `0.0635` |
+| Hybrid BM25 + LTR | `0.05` | `0.0676` |
+| Hybrid BM25 + LTR | `0.10` | `0.0723` |
+| Hybrid BM25 + LTR | `0.20` | `0.0733` |
+| Hybrid BM25 + LTR | `0.30` | `0.0693` |
+
+---
+
+# Best Configuration
+
+```text
+Hybrid BM25 + LightGBM LambdaRank
+alpha = 0.20
+NDCG@10 = 0.0733
+```
+
 ## Implemented Features Snapshot 2026 1 / 05/2026
 
 | Feature | Variable | Description | Purpose |
