@@ -135,3 +135,87 @@ Hybrid BM25 + LightGBM LambdaRank
 alpha = 0.20
 NDCG@10 = 0.0733
 ```
+
+# Retrieval Experiments Comparison
+
+## Dense + BM25 Hybrid Retrieval
+
+We implemented:
+- a BM25 baseline,
+- a dense retrieval model using `all-MiniLM-L6-v2`,
+- and a hybrid system combining both scores.
+
+### Toy Evaluation (3 Queries)
+
+| System | α | nDCG@3 |
+|---|---|---|
+| BM25-only | – | `0.8213` |
+| Hybrid | `0.3` | `0.8623` |
+| Hybrid | `0.5` | `0.8863` |
+| Hybrid | `0.6` | `0.8213` |
+| Hybrid | `0.7` | `0.8213` |
+
+Best result:
+
+```text
+Hybrid Dense + BM25
+alpha = 0.5
+nDCG@3 = 0.8863
+```
+
+### Extended Evaluation (7 Queries)
+
+| System | α | nDCG@3 |
+|---|---|---|
+| BM25 | – | `0.7091` |
+| Hybrid | `0.5` | `0.7557` |
+
+The hybrid approach consistently outperformed the BM25 baseline, especially for semantically complex queries.
+
+---
+
+# Learning-to-Rank (LTR) Hybrid Retrieval
+
+## Added Features
+
+| Feature | Variable |
+|---|---|
+| BM25 Score | `f_bm25` |
+| Query Length | `f_qlen` |
+| Document Length | `f_doclen` |
+| Recency | `f_recency` |
+| Query Overlap | `f_overlap` |
+| Title Match | `f_title_match` |
+
+---
+
+## Evaluation Results (NDCG@10)
+
+| Model | Alpha | NDCG@10 |
+|---|---|---|
+| BM25 Baseline | – | `0.0635` |
+| Hybrid BM25 + LTR | `0.05` | `0.0676` |
+| Hybrid BM25 + LTR | `0.10` | `0.0723` |
+| Hybrid BM25 + LTR | `0.20` | `0.0733` |
+| Hybrid BM25 + LTR | `0.30` | `0.0693` |
+
+Best result:
+
+```text
+Hybrid BM25 + LambdaRank
+alpha = 0.20
+NDCG@10 = 0.0733
+```
+
+---
+
+## Conclusion
+
+The experiments show that hybrid retrieval methods improve ranking quality compared to pure BM25 baselines.
+
+Key findings:
+- Dense retrieval improves semantic matching.
+- Learning-to-Rank allows combining multiple ranking signals.
+- Recency became the strongest feature in the scientific retrieval task.
+- Hybrid systems achieved the best overall performance.
+- 
