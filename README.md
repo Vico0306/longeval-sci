@@ -1,221 +1,121 @@
-Setup:
-Wir haben ein BM25-Baseline-System, ein Dense-Modell (all-MiniLM-L6-v2) und ein Hybrid-System (gewichtete Kombination aus BM25- und Dense-Scores mit α = 0.6) implementiert.
+# LongEval-Sci Retrieval Pipeline
 
-Evaluation:
-Für ein kleines, manuell annotiertes Testset (3 Queries, 5 Dokumente, einfache Relevanzlabels) haben wir nDCG@3 berechnet.
+Dieses Repository enthält unsere finale Retrieval-Pipeline für **LongEval-Sci / Task 1: Scientific Retrieval**.
 
-Ergebnis (Toy-Setup):
-BM25 und Hybrid erreichen beide einen durchschnittlichen nDCG@3 von ca. 0.82.
-→ Im kleinen Setup ist das Hybrid-System noch nicht klar besser, aber die vollständige Pipeline für einen systematischen Vergleich ist implementiert (Run-File + nDCG-Eval).
+Ziel ist es, wissenschaftliche Dokumente für Suchanfragen zu ranken und BM25 durch zusätzliche semantische, zeitliche und citation-basierte Features zu verbessern.
 
-In einer ersten Parameterstudie haben wir das Gewicht α zwischen BM25 und Dense-Scores variiert (0.3, 0.5, 0.7).
-Auf unserem Toy-Testset zeigte sich α = 0.5 mit einem nDCG@3 von 0.8863 als beste Konfiguration, während BM25-only und Hybrid mit α ≥ 0.6 bei etwa 0.82 lagen.
-| System    | α   | nDCG@3 |
-| --------- | --- | ------ |
-| BM25-only | –   | 0.8213 |
-| Hybrid    | 0.3 | 0.8623 |
-| Hybrid    | 0.5 | 0.8863 |
-| Hybrid    | 0.6 | 0.8213 |
-| Hybrid    | 0.7 | 0.8213 |
+## Ansatz
 
-Neue Evaluation (7 Queries):
-| System | α   | nDCG@3 |
-| ------ | --- | ------ |
-| BM25   | –   | 0.7091 |
-| Hybrid | 0.5 | 0.7557 |
+Unser System nutzt eine hybride Pipeline:
 
-Mit einer erweiterten Menge von 7 Queries zeigt sich, dass das Hybrid-System mit α = 0.5 im Schnitt ein höheres nDCG@3 (0.756) erreicht als die BM25-Baseline (0.709).
-Besonders bei semantisch komplexeren Anfragen (z. B. Q3, Q4) profitiert das Hybrid-System von der Kombination aus sparscher und dichter Repräsentation.
+1. **BM25** erzeugt Top-K Kandidaten  
+2. Zusätzliche Features werden berechnet:
+   - BM25 Score
+   - Query-Länge
+   - Dokumentlänge
+   - Recency
+   - Query-Dokument-Overlap
+   - Title Match
+   - Dense Similarity
+   - Citation Count
+3. Ein **LightGBM LambdaRank** Modell kombiniert diese Features
+4. Das finale Ranking wird als Run-Datei ausgegeben
 
-## Implemented Features Snapshot 2026 1 / 04/2026
-
-# Implemented Features
-
-| Feature | Variable | Description | Purpose |
-|---|---|---|---|
-| BM25 Score | `f_bm25` | Original BM25 relevance score | Baseline retrieval signal |
-| Query Length | `f_qlen` | Number of terms in the query | Handles short vs. long queries |
-| Document Length | `f_doclen` | Number of words in the document | Learns document length preferences |
-| Publication Year | `f_year` | Publication year extracted from metadata | Captures temporal relevance |
-
----
-
-# Core Ranking Features
-
-```python
-feature_cols = [
-    "f_bm25",
-    "f_qlen",
-    "f_doclen",
-    "f_year"
-]
+Die finale Score-Kombination basiert auf:
+```text
+final_score = BM25 + α · LTR
 ```
 
----
+## Features
 
-# Evaluation Results (NDCG@10)
+Unser Learning-to-Rank-Modell kombiniert verschiedene Feature-Gruppen, um die Relevanz wissenschaftlicher Dokumente besser einschätzen zu können.
 
-| Model | Alpha | NDCG@10 |
+| Feature | Gruppe | Beschreibung |
 |---|---|---|
-| BM25 Baseline | - | `0.0635` |
-| Hybrid BM25 + LTR | `0.05` | `0.0676` |
-| Hybrid BM25 + LTR | `0.10` | `0.0723` |
-| Hybrid BM25 + LTR | `0.20` | `0.0733` |
-| Hybrid BM25 + LTR | `0.30` | `0.0693` |
+| `f_bm25` | Lexikalisch | BM25-Score des Dokuments für die jeweilige Query |
+| `f_qlen` | Query | Länge der Query |
+| `f_doclen` | Dokument | Länge des Dokuments |
+| `f_recency` | Zeit | Alter des Dokuments in Monaten |
+| `f_overlap` | Query-Dokument | Anteil der Query-Terme, die im Dokument vorkommen |
+| `f_title_match` | Query-Dokument | Anteil der Query-Terme, die im Titel vorkommen |
+| `f_dense` | Semantisch | Cosine Similarity zwischen Query- und Dokument-Embedding |
+| `f_log_citation_count` | Citation | Logarithmierte Anzahl der Zitationen eines Dokuments |
 
----
+### Feature-Gruppen
 
-# Best Configuration
+- **Lexikalische Features:** erfassen klassische Wortüberlappung über BM25.
+- **Semantische Features:** erfassen inhaltliche Ähnlichkeit über Dense Embeddings.
+- **Zeitliche Features:** berücksichtigen das Alter eines wissenschaftlichen Dokuments.
+- **Citation Features:** dienen als Signal für wissenschaftlichen Einfluss.
+- **Query-Dokument-Features:** messen direkte Überschneidungen zwischen Query, Titel und Dokumenttext.
+# Evaluation
+
+Die Evaluation erfolgt mit nDCG@10.
+
+Für Snapshot 1 lagen Qrels vor. Dort erzielte das hybride System bessere Ergebnisse als BM25:
+
+| System         |    nDCG@10 |
+| -------------- | ---------: |
+| BM25           |     0.3076 |
+| Hybrid α = 0.1 |     0.3522 |
+| Hybrid α = 0.2 |     0.3644 |
+| Hybrid α = 0.3 |     0.3750 |
+| Hybrid α = 0.4 | **0.3845** |
+| Hybrid α = 0.5 |     0.3830 |
+
+# Finale Umsetzung
+
+Die finale Version befindet sich im Jupyter Notebook:
+```text
+final_pipeline.ipynb
+```
+Das Notebook enthält:
+
+- Laden der LongEval-Daten
+- Indexierung mit PyTerrier
+- BM25 Retrieval
+- Feature Engineering
+- Dense Feature Berechnung
+- LightGBM LambdaRank Training
+- Run-Erstellung für die Snapshots
+
+## Output
+
+Die finalen Runs werden im TREC-Format erzeugt:
 
 ```text
-Hybrid BM25 + LightGBM LambdaRank
-alpha = 0.20
-NDCG@10 = 0.0733
+qid Q0 docid rank score run_name
 ```
 
-## Implemented Features Snapshot 2026 1 / 05/2026
-
-| Feature | Variable | Description | Purpose |
-|---|---|---|---|
-| BM25 Score | `f_bm25` | Original BM25 relevance score | Baseline retrieval signal |
-| Query Length | `f_qlen` | Number of terms in the query | Handles short vs. long queries |
-| Document Length | `f_doclen` | Number of words in the document | Learns document length preferences |
-| Recency | `f_recency` | Document age in months | Promotes newer scientific documents |
-| Query-Document Overlap | `f_overlap` | Token overlap between query and document text | Measures lexical similarity |
-| Title Match | `f_title_match` | Token overlap between query and document title | Captures strong title relevance |
-
----
-
-# Core Ranking Features
-
-```python
-feature_cols = [
-    "f_bm25",
-    "f_qlen",
-    "f_doclen",
-    "f_recency",
-    "f_overlap",
-    "f_title_match"
-]
-```
-
----
-
-# Feature Importance
-
-| Feature | Importance |
-|---|---|
-| `f_recency` | `5673.04` |
-| `f_bm25` | `3086.18` |
-| `f_doclen` | `2183.91` |
-| `f_overlap` | `1059.30` |
-| `f_title_match` | `824.56` |
-| `f_qlen` | `750.11` |
-
-The results indicate that **document recency** is the strongest ranking signal for the LongEval task.
-
----
-
-# Evaluation Results (NDCG@10)
-
-| Model | Alpha | NDCG@10 |
-|---|---|---|
-| BM25 Baseline | - | `0.0635` |
-| Hybrid BM25 + LTR | `0.05` | `0.0676` |
-| Hybrid BM25 + LTR | `0.10` | `0.0723` |
-| Hybrid BM25 + LTR | `0.20` | `0.0733` |
-| Hybrid BM25 + LTR | `0.30` | `0.0693` |
-
----
-
-# Best Configuration
+Beispiel:
 
 ```text
-Hybrid BM25 + LightGBM LambdaRank
-alpha = 0.20
-NDCG@10 = 0.0733
+00dea7cb26b0df14733b1aa2e48d4189 Q0 11012449 1 48.36624608124125 team_vico_ltr
 ```
 
-# Retrieval Experiments Comparison
-
-## Dense + BM25 Hybrid Retrieval
-
-We implemented:
-- a BM25 baseline,
-- a dense retrieval model using `all-MiniLM-L6-v2`,
-- and a hybrid system combining both scores.
-
-### Toy Evaluation (3 Queries)
-
-| System | α | nDCG@3 |
-|---|---|---|
-| BM25-only | – | `0.8213` |
-| Hybrid | `0.3` | `0.8623` |
-| Hybrid | `0.5` | `0.8863` |
-| Hybrid | `0.6` | `0.8213` |
-| Hybrid | `0.7` | `0.8213` |
-
-Best result:
+Für die Abgabe wird folgende Ordnerstruktur verwendet:
 
 ```text
-Hybrid Dense + BM25
-alpha = 0.5
-nDCG@3 = 0.8863
+longeval_submission/
+├── snapshot-1/
+│   └── run.txt.gz
+├── snapshot-2/
+│   └── run.txt.gz
+├── snapshot-3/
+│   └── run.txt.gz
+└── ir-metadata.yml
 ```
 
-### Extended Evaluation (7 Queries)
+# Technologien
+- Python
+- Jupyter Notebook
+- PyTerrier
+- LightGBM
+- SentenceTransformers
+- ir_datasets_longeval
+- pandas
+- numpy
 
-| System | α | nDCG@3 |
-|---|---|---|
-| BM25 | – | `0.7091` |
-| Hybrid | `0.5` | `0.7557` |
+# Fazit
 
-The hybrid approach consistently outperformed the BM25 baseline, especially for semantically complex queries.
-
----
-
-# Learning-to-Rank (LTR) Hybrid Retrieval
-
-## Added Features
-
-| Feature | Variable |
-|---|---|
-| BM25 Score | `f_bm25` |
-| Query Length | `f_qlen` |
-| Document Length | `f_doclen` |
-| Recency | `f_recency` |
-| Query Overlap | `f_overlap` |
-| Title Match | `f_title_match` |
-
----
-
-## Evaluation Results (NDCG@10)
-
-| Model | Alpha | NDCG@10 |
-|---|---|---|
-| BM25 Baseline | – | `0.0635` |
-| Hybrid BM25 + LTR | `0.05` | `0.0676` |
-| Hybrid BM25 + LTR | `0.10` | `0.0723` |
-| Hybrid BM25 + LTR | `0.20` | `0.0733` |
-| Hybrid BM25 + LTR | `0.30` | `0.0693` |
-
-Best result:
-
-```text
-Hybrid BM25 + LambdaRank
-alpha = 0.20
-NDCG@10 = 0.0733
-```
-
----
-
-## Conclusion
-
-The experiments show that hybrid retrieval methods improve ranking quality compared to pure BM25 baselines.
-
-Key findings:
-- Dense retrieval improves semantic matching.
-- Learning-to-Rank allows combining multiple ranking signals.
-- Recency became the strongest feature in the scientific retrieval task.
-- Hybrid systems achieved the best overall performance.
-- 
+Das Projekt zeigt, dass BM25 durch semantische, zeitliche und citation-basierte Features in Kombination mit Learning-to-Rank verbessert werden kann. Besonders effektiv war die hybride Kombination aus BM25 und LTR.
