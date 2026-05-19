@@ -22,15 +22,17 @@ Unser System nutzt eine hybride Pipeline:
 4. Das finale Ranking wird als Run-Datei ausgegeben
 
 Die finale Score-Kombination basiert auf:
-
-
+```text
 final_score = BM25 + α · LTR
+```
 
 # Dense Features
 
 Für die semantische Ähnlichkeit verwenden wir:
 
+```text
 sentence-transformers/all-MiniLM-L6-v2
+```
 
 Dense wird nicht als eigener Retriever genutzt, sondern als Feature im Learning-to-Rank-Modell.
 
@@ -38,7 +40,9 @@ Dense wird nicht als eigener Retriever genutzt, sondern als Feature im Learning-
 
 Citation Counts werden als wissenschaftliches Impact-Signal genutzt.
 Da Citation Counts stark skalieren, verwenden wir:
+```text
 f_log_citation_count = log(1 + citation_count)
+```
 
 # Evaluation
 
@@ -58,9 +62,9 @@ Für Snapshot 1 lagen Qrels vor. Dort erzielte das hybride System bessere Ergebn
 # Finale Umsetzung
 
 Die finale Version befindet sich im Jupyter Notebook:
-
+```text
 final_pipeline.ipynb
-
+```
 Das Notebook enthält:
 
 - Laden der LongEval-Daten
