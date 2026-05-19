@@ -71,28 +71,23 @@ Das Notebook enthält:
 - LightGBM LambdaRank Training
 - Run-Erstellung für die Snapshots
 
-# Output
+## Output
 
+Die finalen Runs werden im TREC-Format erzeugt:
+
+```text
 qid Q0 docid rank score run_name
+```
 
-Für die Abgabe wird folgende Struktur verwendet:
+Beispiel:
 
-longeval_submission/
+```text
+00dea7cb26b0df14733b1aa2e48d4189 Q0 11012449 1 48.36624608124125 team_vico_ltr
+```
 
-├── snapshot-1/
+Für die Abgabe wird folgende Ordnerstruktur verwendet:
 
-│   └── run.txt.gz
-
-├── snapshot-2/
-
-│   └── run.txt.gz
-
-├── snapshot-3/
-
-│   └── run.txt.gz
-
-└── ir-metadata.yml
-
+```text
 longeval_submission/
 ├── snapshot-1/
 │   └── run.txt.gz
@@ -101,6 +96,7 @@ longeval_submission/
 ├── snapshot-3/
 │   └── run.txt.gz
 └── ir-metadata.yml
+```
 
 # Technologien
 - Python
