@@ -90,7 +90,7 @@ qid Q0 docid rank score run_name
 Beispiel:
 
 ```text
-00dea7cb26b0df14733b1aa2e48d4189 Q0 11012449 1 48.36624608124125 team_vico_ltr
+00dea7cb26b0df14733b1aa2e48d4189 Q0 11012449 1 48.36624608124125 dense-fusion
 ```
 
 Für die Abgabe wird folgende Ordnerstruktur verwendet:
