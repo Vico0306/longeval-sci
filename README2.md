@@ -26,24 +26,28 @@ Die finale Score-Kombination basiert auf:
 final_score = BM25 + α · LTR
 ```
 
-# Dense Features
+## Features
 
-Für die semantische Ähnlichkeit verwenden wir:
+Unser Learning-to-Rank-Modell kombiniert verschiedene Feature-Gruppen, um die Relevanz wissenschaftlicher Dokumente besser einschätzen zu können.
 
-```text
-sentence-transformers/all-MiniLM-L6-v2
-```
+| Feature | Gruppe | Beschreibung |
+|---|---|---|
+| `f_bm25` | Lexikalisch | BM25-Score des Dokuments für die jeweilige Query |
+| `f_qlen` | Query | Länge der Query |
+| `f_doclen` | Dokument | Länge des Dokuments |
+| `f_recency` | Zeit | Alter des Dokuments in Monaten |
+| `f_overlap` | Query-Dokument | Anteil der Query-Terme, die im Dokument vorkommen |
+| `f_title_match` | Query-Dokument | Anteil der Query-Terme, die im Titel vorkommen |
+| `f_dense` | Semantisch | Cosine Similarity zwischen Query- und Dokument-Embedding |
+| `f_log_citation_count` | Citation | Logarithmierte Anzahl der Zitationen eines Dokuments |
 
-Dense wird nicht als eigener Retriever genutzt, sondern als Feature im Learning-to-Rank-Modell.
+### Feature-Gruppen
 
-# Citation Features
-
-Citation Counts werden als wissenschaftliches Impact-Signal genutzt.
-Da Citation Counts stark skalieren, verwenden wir:
-```text
-f_log_citation_count = log(1 + citation_count)
-```
-
+- **Lexikalische Features:** erfassen klassische Wortüberlappung über BM25.
+- **Semantische Features:** erfassen inhaltliche Ähnlichkeit über Dense Embeddings.
+- **Zeitliche Features:** berücksichtigen das Alter eines wissenschaftlichen Dokuments.
+- **Citation Features:** dienen als Signal für wissenschaftlichen Einfluss.
+- **Query-Dokument-Features:** messen direkte Überschneidungen zwischen Query, Titel und Dokumenttext.
 # Evaluation
 
 Die Evaluation erfolgt mit nDCG@10.
