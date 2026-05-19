@@ -78,12 +78,19 @@ qid Q0 docid rank score run_name
 Für die Abgabe wird folgende Struktur verwendet:
 
 longeval_submission/
+
 ├── snapshot-1/
+
 │   └── run.txt.gz
+
 ├── snapshot-2/
+
 │   └── run.txt.gz
+
 ├── snapshot-3/
+
 │   └── run.txt.gz
+
 └── ir-metadata.yml
 
 # Technologien
