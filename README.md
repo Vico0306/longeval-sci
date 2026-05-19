@@ -67,7 +67,7 @@ Für Snapshot 1 lagen Qrels vor. Dort erzielte das hybride System bessere Ergebn
 
 Die finale Version befindet sich im Jupyter Notebook:
 ```text
-final_pipeline.ipynb
+final_ltr_bm25_hybrid.ipynb
 ```
 Das Notebook enthält:
 
