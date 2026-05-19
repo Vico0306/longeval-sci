@@ -93,6 +93,15 @@ longeval_submission/
 
 └── ir-metadata.yml
 
+longeval_submission/
+├── snapshot-1/
+│   └── run.txt.gz
+├── snapshot-2/
+│   └── run.txt.gz
+├── snapshot-3/
+│   └── run.txt.gz
+└── ir-metadata.yml
+
 # Technologien
 - Python
 - Jupyter Notebook
